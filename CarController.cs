@@ -10,52 +10,52 @@ public class CarController : MonoBehaviour
     public DefaultCar _DefaultCar;
 
     /// <summary>
-    /// Мощность на каждую передачу в зависимости от кривой
+    /// Engine Power for Transmission State with curve dependency
     /// </summary>
     public AnimationCurve[] EngineTorqueCurve;
     /// <summary>
-    /// Скорость при которой будет смена передачи
+    /// Speed required to change Transmission state
     /// </summary>
     public float[] TargetSpeedForGear;
     /// <summary>
-    /// Максимальная скорость для текущей передачи
+    /// Maximum speed for current Transmission State
     /// </summary>
     public float[] MaxSpeedForGear;
     /// <summary>
-    /// Текущий RPM
+    /// Current RPM
     /// </summary>
     public float EngineRPM = 0f;
     /// <summary>
-    /// Сглаженый RPM
+    /// Coherent RPM
     /// </summary>
     public float RawEngineRPM = 0f;
     [HideInInspector]
     /// <summary>
-    /// Крутящий момент вперед
+    /// Forward torque
     /// </summary>
     public float EngineTorque = 2000f;
     /// <summary>
-    /// Нажатие кнопки вперед/назад [-1, 1]
+    /// Forward/Back button handle [-1, 1]
     /// </summary>
     [HideInInspector]
     public float CurrentAccel;
     /// <summary>
-    /// Нажатие кнопки назад [0, 1]
+    /// Back button handle [0, 1]
     /// </summary>
     [HideInInspector]
     public float CurrentFootbrake;
 
     /// <summary>
-    /// True - если к машине прикреплен прицеп
+    /// True if trailer is connected
     /// </summary>
     public bool IsConnected = false;
 
     /// <summary>
-    /// Текущая скорость машины
+    /// Current car speed
     /// </summary>
     public double Speed { get { return _car_Rigidbody.velocity.magnitude * 3.6; } }
     /// <summary>
-    /// Скорость движения по направлению вперед
+    /// Forward Speed
     /// </summary>
     public double CurrentDirectionSpeed
     {
@@ -67,11 +67,11 @@ public class CarController : MonoBehaviour
         }
     }
     /// <summary>
-    /// Текущая передача
+    /// Current Transmission State
     /// </summary>
     public int CurrentGear { get; private set; }
     /// <summary>
-    /// [0,1] Нажата ли педаль газа
+    /// [0,1] Is Accelerator Active
     /// </summary>
     public float GasInput
     {
@@ -121,7 +121,7 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Установка массы колес в зависимомти от массы машины
+    /// Wheels mass handler with Current Car weight dependence
     /// </summary>
     private void SetWheelMass()
     {
@@ -132,14 +132,14 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Находит колайдеры и меши колес у машины
+    /// Find Colliders and Meshes for wheels
     /// </summary>
     private void SetWheels()
     {
         GameObject wheels = null;
         GameObject wColliders = null;
 
-        //Найти контейнеры с мешами и колайдерами
+        //Find containers for Meshes and Colliders
         for (int i = 0; i < gameObject.transform.childCount; i++)
         {
             if (gameObject.transform.GetChild(i).CompareTag("Wheels"))
@@ -150,13 +150,13 @@ public class CarController : MonoBehaviour
 
         if (wheels == null)
         {
-            Debug.Log("Не найден обьект с тегом `Wheels`");
+            Debug.Log("Object with tag `Wheels` not found");
             return;
         }
 
         if (_wheelColliders == null)
         {
-            Debug.Log("Не найден обьект с тегом `WheelHubs`");
+            Debug.Log("Object with tag `WheelHubs` not found");
             return;
         }
 
@@ -172,7 +172,7 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// True если скорость машины больше максимальной
+    /// True if Car Speed is higher than Maximum Speed
     /// </summary>
     /// <returns></returns>
     bool OverTorque()
@@ -185,10 +185,10 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Толкане колеса вперед
+    /// Pushing the wheel forward
     /// </summary>
-    /// <param name="wc">Колесо</param>
-    /// <param name="torque">Мощность</param>
+    /// <param name="wc">Wheel</param>
+    /// <param name="torque">Power</param>
     void ApplyMotorTorque(WheelCollider wc, float torque)
     {
         WheelHit hit;
@@ -217,19 +217,19 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Присвоение машине центр масы
+    /// Center Mass for Car
     /// </summary>
     private void SetCOM()
     {
         _com = transform.Find("CenterOfMass");
         if (_com == null)
-            print("Не удалось найти `CenterOfMass` у " + gameObject.name);
+            print("Not found `CenterOfMass` in " + gameObject.name);
 
         _car_Rigidbody.centerOfMass = _com.localPosition;
     }
 
     /// <summary>
-    /// Синхронизация оборотов колес с мешем
+    /// Mesh and wheel rotation synchronization
     /// </summary>
     private void SyncWheelsAndColliders()
     {
@@ -244,25 +244,25 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Поворот передних колес машины
+    /// Forward wheels rotation
     /// </summary>
     /// <param name="steer"></param>
     private void SetSteer(float steer)
     {
         steer = Mathf.Clamp(steer, -1, 1);
 
-        // Предположим, что колеса 0 и 1 являются передними колесами.
+        // Define wheels 0 and 1 as Forward Wheels
         float steerAngle = steer * _maximimSteerAngle;
         _wheelColliders[0].steerAngle = steerAngle;
         _wheelColliders[1].steerAngle = steerAngle;
     }
 
     /// <summary>
-    /// Движение машиной
+    /// Car Movement
     /// </summary>
-    /// <param name="accel">Вперед/назад</param>
-    /// <param name="footbrake">Тормоз</param>
-    /// <param name="forceEngine">True если включен форсированый режим</param>
+    /// <param name="accel">Forward/Backward</param>
+    /// <param name="footbrake">Brake</param>
+    /// <param name="forceEngine">True if Forced mode is ON</param>
     private void ApplyDrive(float accel, float footbrake, bool forceEngine)
     {
         float fuelConsumption = _DefaultCar.FuelConsumption;
@@ -280,12 +280,12 @@ public class CarController : MonoBehaviour
         if (_Car.Fuel < 0)
             _Car.Fuel = 0;
 
-        //Торможение на каждое колесо
+        //Brake for each wheel
         float thrustTorque = (_brakeTorque / _wheelColliders.Count);
 
         //DebugInfo.Add("accel", accel);
 
-        //Торможение
+        //Braking process
         if (CurrentDirectionSpeed > 3 && accel < 0)
             ApplyBrake(Mathf.Abs(accel) * thrustTorque);
         else if (CurrentDirectionSpeed < -3 && accel > 0)
@@ -293,7 +293,7 @@ public class CarController : MonoBehaviour
         else
             ApplyBrake(0);
 
-        //Крутящий момент на каждое колесо
+        //Torque per each wheel
         thrustTorque = (EngineTorque / _wheelColliders.Count);
         if (accel >= 0 || accel <= 0)
         {
@@ -305,7 +305,7 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Задать торможение
+    /// Set Brake
     /// </summary>
     /// <param name="brake"></param>
     private void ApplyBrake(float brake)
@@ -318,7 +318,7 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Помогает машине не перевернутся при поворотах
+    /// Steer Helper on road turns
     /// </summary>
     private void SteerHelper()
     {
@@ -327,10 +327,10 @@ public class CarController : MonoBehaviour
             WheelHit wheelhit;
             _wheelColliders[i].GetGroundHit(out wheelhit);
             if (wheelhit.normal == Vector3.zero)
-                return; // колеса не на земле, так что не перестраиваем скорость
+                return; // Wheels are not on earth, no changes in speed
         }
 
-        // если угол поворота машины достаточно большой, то не даем ей перевернутся
+        // provide support if car turning angle is too big
         if (Mathf.Abs(_oldRotation - transform.eulerAngles.y) < 10f)
         {
             var turnadjust = (transform.eulerAngles.y - _oldRotation) * _steeerHelper;
@@ -341,7 +341,7 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Расчет оборотов у машины
+    /// Engine Momentum calculation
     /// </summary>
     private void Engine()
     {
@@ -398,7 +398,7 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Смена передач в зависимости от скорости
+    /// Transition state change with speed dependency
     /// </summary>
     private void GearBox()
     {
@@ -424,7 +424,7 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Смена передач
+    /// Change of transition state
     /// </summary>
     /// <param name="gear"></param>
     /// <returns></returns>
@@ -449,11 +449,11 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Создание ограничений скорости, мощности двигателя в зависимости от текущей передачи
+    /// Speed limit and Power limit for current Transition state
     /// </summary>
     private void TorqueCurve()
     {
-        //Максимальная скорость на текущую передачу
+        //Maximum speed for each transition
         if (MaxSpeedForGear == null)
             MaxSpeedForGear = new float[_totalGears];
 
@@ -502,17 +502,17 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Управление машиной
+    /// Car Controller
     /// </summary>
-    /// <param name="steering">Horizontal управление</param>
-    /// <param name="accel">Крутящий момент</param>
-    /// <param name="footbrake">Vertical ножной тормоз</param>
-    /// <param name="forceEngine">True если включен форсированый режим</param>
+    /// <param name="steering">Horizontal control</param>
+    /// <param name="accel">Torque</param>
+    /// <param name="footbrake">Vertical footbrake</param>
+    /// <param name="forceEngine">True if Forced mode is ON</param>
     public void Move(float steering, float accel, float footbrake, bool forceEngine)
     {
         //DebugInfo.Add("CurrentDirectionSpeed", (float)CurrentDirectionSpeed);
 
-        // Ограничение входящих значений
+        // Limitation of input values
         CurrentFootbrake = footbrake = Mathf.Clamp(footbrake, 0, 1);
         CurrentAccel = accel = Mathf.Clamp(accel, -1, 1);
 
@@ -532,7 +532,7 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Остановить машину
+    /// Stop the car
     /// </summary>
     public void StopCar()
     {
@@ -540,7 +540,7 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Остановка машины
+    /// Car is having Brake applied
     /// </summary>
     /// <returns></returns>
     private IEnumerator StopCarCoroutine()
@@ -555,7 +555,7 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Перерасчет всех характеристик в зависимости от левела компонента
+    /// Recalculations for components with level dependencies
     /// </summary>
     private void RecalcCarCharacteristics()
     {
@@ -569,7 +569,7 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Применение х-к машины с сервера
+    /// Input of car characteristics from server
     /// </summary>
     private void SetDefaultValues()
     {
@@ -608,9 +608,9 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Нанесение урона машине
+    /// Car Damage System
     /// </summary>
-    /// <param name="damage">Урон</param>
+    /// <param name="damage">Damage</param>
     private void TakeDamage(float damage)
     {
         float health = _Car.Health - damage;
@@ -623,32 +623,32 @@ public class CarController : MonoBehaviour
     #region private variables
 
     /// <summary>
-    /// Реверсивная передача в настоящее время
+    /// Current Reverse state
     /// </summary>
     private int _direction = 1;
     /// <summary>
-    /// Кол-во передач
+    /// Number of States for Transition
     /// </summary>
     private int _totalGears = 8;
     /// <summary>
-    /// Максимальная скорость
+    /// Maximum speed
     /// </summary>
     private float _maxSpeed = 120;
 
     /// <summary>
-    /// Угол поворота
+    /// Steer Angle
     /// </summary>
     private float _maximimSteerAngle = 20;
     /// <summary>
-    /// Сила торможения
+    /// Brake torque
     /// </summary>
     private float _brakeTorque = 2000f;
     /// <summary>
-    /// Максимум оборотов двигателя
+    /// Maximum value of RPM
     /// </summary>
     private float _maxEngineRPM = 7000f;
     /// <summary>
-    /// Минимальное кол-во оборотов двигателя
+    /// minimum value of RPM
     /// </summary>
     private float _minEngineRPM = 1000f;
     [Range(0f, .5f)] private float _gearShiftingDelay = .35f;
@@ -657,11 +657,11 @@ public class CarController : MonoBehaviour
     [Range(.75f, 2f)] private float _engineInertia = 1f;
     [Range(0f, 1f)] private float _TCSStrength = 1f;
     /// <summary>
-    /// Коефициент при форсировании двигателя
+    /// Value for Forced modeК
     /// </summary>
     [Range(1f, 2f)] private float _forceEngine = 1.3f;
     /// <summary>
-    /// 1 - Полная помощь на поворотах что бы машине не перевернулась
+    /// 1 - Full assistance on roadturns
     /// </summary>
     [Range(0f, 1f)] private float _steeerHelper = 1f;
 
@@ -671,30 +671,30 @@ public class CarController : MonoBehaviour
     private float _launched = 0;
 
     /// <summary>
-    /// Коллайдеры колес
+    /// Wheels Colliders
     /// </summary>
     [SerializeField]
     private List<WheelCollider> _wheelColliders = new List<WheelCollider>();
     /// <summary>
-    /// Меши колес
+    /// Wheels Meshes
     /// </summary>
     [SerializeField]
     private List<GameObject> _wheelMeshes = new List<GameObject>();
     /// <summary>
-    /// Центр масы
+    /// Center mass
     /// </summary>
     [SerializeField]
     private Transform _com;
     /// <summary>
-    /// Rigidbody машины
+    /// Rigidbody of Car
     /// </summary>
     private Rigidbody _car_Rigidbody;
     /// <summary>
-    /// Предыдущий угол поворота машины
+    /// Previous turning angle
     /// </summary>
     private float _oldRotation;
     /// <summary>
-    /// True, если сейчас идет передключение коробки передач
+    /// True, if now Transition state is changed
     /// </summary>
     private bool _gearIsChanging = false;
 
